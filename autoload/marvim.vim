@@ -109,19 +109,20 @@ endfunction
 
 " Function: #run {{{1
 function! marvim#run(macro)
-  let l:is_macro = filereadable(a:macro)
+  let l:macro_file = marvim#get_absolute_path(a:macro)
+  let l:is_macro = filereadable(l:macro_file)
 
   if (l:is_macro == 0)
     echo 'Macro does not exist'
     return
   endif
 
-  let l:macro_type = marvim#get_macro_type(a:macro)
+  let l:macro_type = marvim#get_macro_type(l:macro_file)
 
   if (l:macro_type == 'mvt')
-    silent execute 'read '.a:macro
+    silent execute 'read '.l:macro_file
   else
-    let l:content = readfile(a:macro, 'b')
+    let l:content = readfile(l:macro_file, 'b')
     call setreg(g:marvim_register, l:content[0])
     silent execute 'normal @'.g:marvim_register
   endif
@@ -134,9 +135,8 @@ function! marvim#search()
   let l:macro_name = marvim#input_macro_name('Macro search: ', g:marvim_prefix_on_load)
 
   if (l:macro_name != '')
-    let l:macro_file = marvim#get_absolute_path(l:macro_name)
     try
-      call marvim#run(l:macro_file)
+      call marvim#run(l:macro_name)
       echo 'Macro '.l:macro_name.' run'
     catch
       echoerr v:exception
