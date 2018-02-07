@@ -166,6 +166,10 @@ endfunction
 function! marvim#store_macro()
   let l:name = marvim#input_macro_name('Enter macro name: ', g:marvim_prefix_on_save)
 
+  if (l:name == '')
+    return
+  endif
+
   let l:tmp_content = [getreg(g:marvim_register)]
 
   call marvim#save_file(l:name, l:tmp_content, s:ext)
