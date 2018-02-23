@@ -113,19 +113,24 @@ function! marvim#run(macro)
   let l:is_macro = filereadable(l:macro_file)
 
   if (l:is_macro == 0)
-    echo 'Macro does not exist'
+    echohl WarningMsg | echo "" | echo "\rMacro ".a:macro." does not exist." | echohl None
     return
   endif
 
   let l:macro_type = marvim#get_macro_type(l:macro_file)
 
-  if (l:macro_type == 'mvt')
+  if (l:macro_type == 'mva')
+    silent execute "%!awk -f ".l:macro_file
+  elseif (l:macro_type == 'mvs')
+    silent execute "%!sed -rf ".l:macro_file
+  elseif (l:macro_type == 'mvt')
     silent execute 'read '.l:macro_file
   else
     let l:content = readfile(l:macro_file, 'b')
     call setreg(g:marvim_register, l:content[0])
     silent execute 'normal @'.g:marvim_register
   endif
+  echohl ModeMsg | echo "" | echo "\rMacro ".a:macro." has been executed." | echohl None
 
 endfunction
 
@@ -137,7 +142,6 @@ function! marvim#search()
   if (l:macro_name != '')
     try
       call marvim#run(l:macro_name)
-      echo 'Macro '.l:macro_name.' run'
     catch
       echoerr v:exception
     endtry
